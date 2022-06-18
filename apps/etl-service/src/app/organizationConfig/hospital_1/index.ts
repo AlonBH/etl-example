@@ -1,4 +1,5 @@
 import { Patient, Treatment } from '../../types';
+import { eIsDeceased } from '../enums';
 import { eSex } from '../enums/sex';
 
 interface Hospital1Patient {
@@ -30,6 +31,16 @@ interface Hospital1Treatment {
   TreatmentID: string;
 }
 
+const getDeceasedStatus = (isDeceased: string): eIsDeceased => {
+  if(isDeceased === "Deceased") {
+    return eIsDeceased.Deceased;
+  } else if(isDeceased === "Hospice") {
+    return eIsDeceased.Hospice;
+  } else {
+    return eIsDeceased.Active
+  }
+}
+
 export const transformPatient1 = ({
   PatientID,
   MRN,
@@ -50,7 +61,7 @@ export const transformPatient1 = ({
     id: PatientID,
     mrn: MRN,
     dateOfBirth: new Date(PatientDOB),
-    isDeceased: IsDeceased,
+    isDeceased: getDeceasedStatus(IsDeceased),
     dateOfDeath: new Date(DOD_TS),
     lastName: LastName,
     firstName: FirstName,

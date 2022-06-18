@@ -1,4 +1,5 @@
 import { Patient, Treatment } from '../../types';
+import { eIsDeceased } from '../enums';
 import { eSex } from '../enums/sex';
 
 interface Hospital2Patient {
@@ -47,7 +48,7 @@ export const transformPatient2 = ({
     id: PatientId,
     mrn: MRN,
     dateOfBirth: new Date(PatientDOB),
-    isDeceased: IsPatientDeceased,
+    isDeceased: IsPatientDeceased === 'N' ? eIsDeceased.Deceased : eIsDeceased.Active,
     dateOfDeath: new Date(DeathDate),
     lastName: LastName,
     firstName: FirstName,

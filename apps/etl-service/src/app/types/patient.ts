@@ -1,10 +1,11 @@
+import { eIsDeceased } from "../organizationConfig/enums";
 import { eSex } from "../organizationConfig/enums/sex";
 
 export interface Patient {
   id: string,
   mrn: string,
   dateOfBirth: Date,
-  isDeceased: string,
+  isDeceased: eIsDeceased,
   dateOfDeath: Date,
   lastName: string,
   firstName: string,
