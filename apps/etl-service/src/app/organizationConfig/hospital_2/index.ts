@@ -3,30 +3,31 @@ import { eIsDeceased } from '../enums';
 import { eSex } from '../enums/sex';
 
 interface Hospital2Patient {
-  PatientId: string,
-  MRN: string,
-  PatientDOB: string,
-  IsPatientDeceased: string,
-  DeathDate: string,
-  LastName: string,
-  FirstName: string,
-  Gender: string,
-  Sex: string,
-  AddressLine: string,
-  AddressCity: string,
-  AddressState: string,
-  AddressZipCode: string
+  PatientId: string;
+  MRN: string;
+  PatientDOB: string;
+  IsPatientDeceased: string;
+  DeathDate: string;
+  LastName: string;
+  FirstName: string;
+  Gender: string;
+  Sex: string;
+  AddressLine: string;
+  AddressCity: string;
+  AddressState: string;
+  AddressZipCode: string;
 }
 
 interface Hospital2Treatment {
-  PatientID: string,
-  StartDate: string,
-  EndDate: string,
-  Active: string,
-  DisplayName: string,
-  Diagnoses: string,
-  CyclesXDays: string,
-  TreatmentID: string
+  TreatmentId: string;
+  PatientId: string;
+  ProtocolID: string;
+  StartDate: string;
+  EndDate: string;
+  Status: string;
+  DisplayName: string;
+  AssociatedDiagnoses: string;
+  NumberOfCycles: number;
 }
 
 export const transformPatient2 = ({
@@ -42,7 +43,7 @@ export const transformPatient2 = ({
   AddressLine,
   AddressCity,
   AddressState,
-  AddressZipCode
+  AddressZipCode,
 }: Hospital2Patient): Patient => {
   return {
     id: PatientId,
@@ -57,28 +58,40 @@ export const transformPatient2 = ({
     address: AddressLine,
     city: AddressCity,
     state: AddressState,
-    zipCode: AddressZipCode
+    zipCode: AddressZipCode,
   };
 };
 
+const getCycles = (startDate: Date, endDate: Date, numberOfCycles: number): string => {
+  const days = Math.ceil(
+    (endDate.getTime() - startDate.getTime()) /
+    (60 * 60 * 24 * 1000) /
+    numberOfCycles);
+  return `${days}X${numberOfCycles}`;
+};
+
 export const transformTreatment2 = ({
-  PatientID,
+  TreatmentId,
+  PatientId,
+  ProtocolID,
   StartDate,
   EndDate,
-  Active,
+  Status,
   DisplayName,
-  Diagnoses,
-  CyclesXDays,
-  TreatmentID
+  AssociatedDiagnoses,
+  NumberOfCycles,
 }: Hospital2Treatment): Treatment => {
+  const endDate = new Date(EndDate);
+  const startDate = new Date(StartDate);
   return {
-    id: TreatmentID,
-    startDate: new Date(StartDate),
-    endDate: new Date(EndDate),
-    active: Active,
+    id: TreatmentId,
+    startDate,
+    endDate,
+    active: Status,
     displayName: DisplayName,
-    diagnoses: Diagnoses,
-    cyclesXDays: CyclesXDays,
-    patientId: PatientID,
-  }
-}
+    diagnoses: AssociatedDiagnoses,
+    cyclesXDays: getCycles(startDate, endDate, NumberOfCycles),
+    patientId: PatientId,
+    protocolId: ProtocolID,
+  };
+};

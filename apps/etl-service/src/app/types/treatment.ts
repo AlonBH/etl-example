@@ -7,5 +7,6 @@ export interface Treatment {
   displayName: string,
   diagnoses: string,
   treatmentLine?: string,
-  cyclesXDays: string
+  cyclesXDays: string,
+  protocolId?: string
 }
