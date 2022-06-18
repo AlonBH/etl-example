@@ -1,8 +1,9 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import * as fs from 'fs';
 import { Transform, pipeline } from 'stream';
 
 import { config } from '../../organizationConfig';
+import { Patient, Treatment } from '../../types';
 
 const etlRouter = Router();
 
@@ -13,7 +14,7 @@ const getOrganizationConfig = (fileName: string) => {
 const getOrganizationName = (fileName: string) =>
   fileName.slice(0, fileName.indexOf('_', fileName.indexOf('_') + 1));
 
-const transformStream = (transformer) =>
+const transformStream = (transformer: (x) => Patient | Treatment): Transform =>
   new Transform({
     transform: function (data, encoding, cb) {
       try {
@@ -29,16 +30,17 @@ const transformStream = (transformer) =>
 
 const handleFinishPipeline = (
   err: NodeJS.ErrnoException,
+  fileName: string,
   successMessage: string
 ) => {
   if (err) {
-    console.log(err);
+    console.log(`Error in ${fileName}`);
   } else {
     console.log(successMessage);
   }
 };
 
-etlRouter.get('', (req, res, next) => {
+etlRouter.get('', (req: Request, res: Response) => {
   // This would come from the current batch
   const patientFileName = 'hospital_1_Patient.csv';
   const patientFileStream = fs.createReadStream(
@@ -48,7 +50,7 @@ etlRouter.get('', (req, res, next) => {
     `${__dirname}/data/patient.ndjson`
   );
 
-  const treatmentFileName = 'hospital_1_Treatment.csv';
+  const treatmentFileName = 'hospital_2_Treatment.csv';
   const treatmentFileStream = fs.createReadStream(
     `${__dirname}/data/${treatmentFileName}`
   );
@@ -65,7 +67,7 @@ etlRouter.get('', (req, res, next) => {
       ),
       patientOutputStream,
       (err: NodeJS.ErrnoException) =>
-        handleFinishPipeline(err, 'Patient pipeline completed successfully')
+        handleFinishPipeline(err, patientFileName, 'Patient pipeline completed successfully')
     );
 
     pipeline(
@@ -76,12 +78,14 @@ etlRouter.get('', (req, res, next) => {
       ),
       treatmentOutputStream,
       (err: NodeJS.ErrnoException) =>
-        handleFinishPipeline(err, 'Treatment pipeline completed successfully')
+        handleFinishPipeline(err, treatmentFileName, 'Treatment pipeline completed successfully')
     );
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
   }
+
+  res.sendStatus(200);
 });
 
 export { etlRouter };
